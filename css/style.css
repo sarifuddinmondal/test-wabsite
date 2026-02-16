@@ -80,7 +80,6 @@ body {
     margin: 0 auto;
 }
 
-/* মোবাইলে ঠিক ২টা কার্ড পাশাপাশি থাকবে */
 @media (max-width: 600px) {
     .main-container {
         grid-template-columns: 1fr 1fr; 
