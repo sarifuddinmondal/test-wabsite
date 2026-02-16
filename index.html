@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKART | Best Online Shopping</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+    <a href="index.html" class="brand-logo">CKART</a>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for products, brands and more">
+        <button onclick="search()" style="background:none; border:none; cursor:pointer; color:#2874f0;">
+            <i class="fa fa-search"></i>
+        </button>
+    </div>
+
+    <div class="header-actions" style="display: flex; align-items: center; gap: 15px; margin-left: 15px; color: white;">
+        <div id="authBox">
+            </div>
+        <div class="cart-box" style="position: relative; cursor: pointer;">
+            <i class="fa fa-shopping-cart" style="font-size: 20px;"></i>
+            <span id="cartCount" style="position: absolute; top: -10px; right: -10px; background: #fb641b; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%;">0</span>
+        </div>
+    </div>
+</header>
+
+<div class="main-container" id="productGrid"></div>
+
+<div id="modal" style="display:none; position:fixed; z-index:2000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center;">
+    <span onclick="closeModal()" style="position:absolute; top:20px; right:30px; font-size:40px; color:white; cursor:pointer;">&times;</span>
+    <img id="modalImg" src="" style="max-width:90%; max-height:90%; border-radius:4px;">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+    import { getSupabase } from './config.js';
+    const supabase = getSupabase();
+
+    // চেক লগইন (ডাটা কোনো পরিবর্তন করা হয়নি)
+    function checkLogin() {
+        const authBox = document.getElementById('authBox');
+        const userMobile = localStorage.getItem('customerMobile');
+        if (userMobile) {
+            authBox.innerHTML = `<a href="myprofile.html" style="color:white; text-decoration:none;"><i class="fa fa-user-circle"></i></a>`;
+        } else {
+            authBox.innerHTML = `<a href="login.html" style="color:white; text-decoration:none;"><i class="fa fa-user"></i></a>`;
+        }
+    }
+
+    // প্রোডাক্ট ফেচ লজিক (আপনার নতুন CSS ক্লাসের সাথে ম্যাচ করা হয়েছে)
+    async function fetchItems() {
+        const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
+        if(error) return;
+
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = "";
+
+        data.forEach(p => {
+            grid.innerHTML += `
+                <div class="product-card">
+                    <div class="image-box" onclick="openZoom('${p.img}')">
+                        <img src="${p.img}" alt="${p.name}">
+                    </div>
+                    <div class="info-box">
+                        <div>
+                            <div class="p-category">${p.cat}</div>
+                            <div class="p-name">${p.name} (${p.content})</div>
+                            <div class="price-box">
+                                <span class="final-price">₹${p.price}</span>
+                                <span class="mrp">₹${p.mrp}</span>
+                                <span class="discount">${p.disc}% off</span>
+                            </div>
+                            <div style="font-size:11px; margin-bottom:10px; color:#212121;">Size: ${p.size || 'N/A'}</div>
+                        </div>
+                        <button class="add-btn" onclick="addToCart(this)">Add to Cart</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // কার্ট লজিক
+    let cartNum = 0;
+    window.addToCart = (btn) => {
+        cartNum++;
+        document.getElementById('cartCount').innerText = cartNum;
+        btn.innerText = "Added";
+        btn.style.background = "#388e3c";
+    }
+
+    // জুম ও সার্চ লজিক
+    window.openZoom = (src) => {
+        document.getElementById('modalImg').src = src;
+        document.getElementById('modal').style.display = 'flex';
+    }
+    window.closeModal = () => document.getElementById('modal').style.display = 'none';
+
+    window.search = () => {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const name = card.querySelector('.p-name').innerText.toLowerCase();
+            card.style.display = name.includes(term) ? "flex" : "none";
+        });
+    }
+
+    checkLogin();
+    fetchItems();
+</script>
+
+</body>
+</html>
