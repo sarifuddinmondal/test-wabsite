@@ -6,28 +6,40 @@
     <title>CKART | Best Online Shopping</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        /* অতিরিক্ত কিছু জরুরি স্টাইল যা CSS ফাইলে মিসিং থাকতে পারে */
+        /* লোগো স্টাইল */
+        .brand-logo img {
+            height: 40px;
+            width: auto;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+
+        /* প্রোফাইল ফটো স্টাইল */
+        .user-profile-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            cursor: pointer;
+        }
+
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             margin-left: 20px;
             color: white;
         }
-        .header-actions i {
-            font-size: 18px;
-            cursor: pointer;
-        }
+
         .cart-box {
             position: relative;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            cursor: pointer;
         }
+
         #cartCount {
             background: #ffda44;
             color: #000;
@@ -36,9 +48,19 @@
             border-radius: 50%;
             font-weight: bold;
             position: absolute;
-            top: -10px;
+            top: -12px;
             right: -10px;
         }
+
+        /* স্টক স্ট্যাটাস কালার */
+        .stock-info {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .in-stock { color: var(--success-green); }
+        .out-stock { color: #d32f2f; }
+
         #modal {
             display: none;
             position: fixed;
@@ -62,15 +84,17 @@
 <body>
 
 <header class="header">
-    <a href="index.html" class="brand-logo">CKART</a>
+    <a href="index.html" class="brand-logo">
+        <img src="https://i.ibb.co/yc5dypjr/1000088857.jpg" alt="CKART">
+    </a>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for products, brands and more">
+        <input type="text" id="searchInput" placeholder="Search for products, brands and more...">
         <button onclick="search()"><i class="fa fa-search"></i></button>
     </div>
 
     <div class="header-actions">
-        <div onclick="location.reload()"><i class="fa fa-home"></i></div>
+        <div onclick="location.reload()" title="Home"><i class="fa fa-home"></i></div>
         
         <div id="authBox">
             <a href="login.html" style="color: white; text-decoration: none;">
@@ -97,28 +121,36 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script type="module">
-    // config.js থেকে Supabase কানেকশন ইমপোর্ট করা
     import { getSupabase } from './config.js';
     const supabase = getSupabase();
 
-    // --- ১. লগইন স্ট্যাটাস চেক ---
-    function checkLogin() {
+    // --- ১. লগইন এবং প্রোফাইল ফটো লজিক ---
+    async function checkLogin() {
         const authBox = document.getElementById('authBox');
         const userMobile = localStorage.getItem('customerMobile');
 
         if (userMobile) {
+            // সুপাবেস থেকে ইউজারের প্রোফাইল ফটো নিয়ে আসা
+            const { data: user, error } = await supabase
+                .from('customers') // আপনার কাস্টমার টেবিলের নাম অনুযায়ী চেক করুন
+                .select('profile_img')
+                .eq('mobile', userMobile)
+                .single();
+
+            let profilePic = '<i class="fa fa-user-circle"></i>';
+            if (user && user.profile_img) {
+                profilePic = `<img src="${user.profile_img}" class="user-profile-img" alt="Profile">`;
+            }
+
             authBox.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px">
-                    <a href="myprofile.html" style="color:white; text-decoration:none;">
-                        <i class="fa fa-user-circle"></i>
-                    </a>
+                    <a href="myprofile.html" title="My Profile">${profilePic}</a>
                     <i class="fa fa-sign-out-alt" onclick="logoutUser()" style="color:#ffda44; cursor:pointer" title="Logout"></i>
                 </div>
             `;
         }
     }
 
-    // লগআউট ফাংশন
     window.logoutUser = () => {
         if(confirm("Do you want to logout?")) {
             localStorage.removeItem('customerMobile');
@@ -126,7 +158,7 @@
         }
     }
 
-    // --- ২. ডাটাবেস থেকে প্রোডাক্ট লোড করা ---
+    // --- ২. ডেটাবেস থেকে সব ডিটেইলসসহ প্রোডাক্ট লোড করা ---
     async function fetchItems() {
         const { data, error } = await supabase
             .from('products')
@@ -134,8 +166,8 @@
             .order('id', { ascending: false });
 
         if(error) {
-            console.error("Error fetching data:", error);
-            document.getElementById('productGrid').innerHTML = "Failed to load products.";
+            console.error("Error:", error);
+            document.getElementById('productGrid').innerHTML = "Error loading products.";
             return;
         }
 
@@ -143,7 +175,8 @@
         grid.innerHTML = "";
 
         data.forEach(p => {
-            // HTML এবং CSS ক্লাসের নাম মিলানো হয়েছে এখানে
+            const isOutOfStock = p.stock <= 0;
+            
             grid.innerHTML += `
                 <div class="product-card">
                     <div class="discount-badge">${p.disc}% OFF</div>
@@ -153,32 +186,44 @@
                     <div class="info-box">
                         <div>
                             <div class="p-category">${p.cat}</div>
-                            <div class="p-name">${p.name} (${p.content})</div>
+                            <div class="p-name">${p.name}</div>
+                            
+                            <div style="font-size: 12px; color: #666;">
+                                ${p.content || ''} | Size: ${p.size_text || p.size_num || 'N/A'}
+                            </div>
+
                             <div class="price-box">
                                 <span class="final-price">₹${p.price}</span>
                                 <span class="mrp">₹${p.mrp}</span>
                                 <span class="discount">${p.disc}% off</span>
                             </div>
-                            <div style="font-size: 12px; color: #878787; margin-bottom: 5px;">Size: ${p.size || 'N/A'}</div>
+
+                            <div class="stock-info ${isOutOfStock ? 'out-stock' : 'in-stock'}">
+                                ${isOutOfStock ? 'Out of Stock' : 'In Stock: ' + p.stock}
+                            </div>
                         </div>
-                        <button class="add-btn" onclick="addToCart(this)">Add to Cart</button>
+                        
+                        <button class="add-btn" 
+                            onclick="addToCart(this)" 
+                            ${isOutOfStock ? 'disabled style="background:#ccc"' : ''}>
+                            ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}
+                        </button>
                     </div>
                 </div>
             `;
         });
     }
 
-    // --- ৩. কার্ট লজিক ---
+    // --- ৩. কার্ট কাউন্ট ---
     let cartNum = 0;
     window.addToCart = (btn) => {
         cartNum++;
         document.getElementById('cartCount').innerText = cartNum;
-        btn.innerText = "Added to Cart";
+        btn.innerText = "Added ✓";
         btn.style.background = "#388e3c";
-        btn.disabled = true;
     }
 
-    // --- ৪. ইমেজ জুম (Modal) ---
+    // --- ৪. ইমেজ জুম ---
     window.openZoom = (src) => {
         document.getElementById('modalImg').src = src;
         document.getElementById('modal').style.display = 'flex';
@@ -188,22 +233,16 @@
         document.getElementById('modal').style.display = 'none';
     }
 
-    // --- ৫. সার্চ ফাংশনালিটি ---
+    // --- ৫. সার্চ ---
     window.search = () => {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.querySelectorAll('.product-card');
         cards.forEach(card => {
             const name = card.querySelector('.p-name').innerText.toLowerCase();
-            const category = card.querySelector('.p-category').innerText.toLowerCase();
-            if(name.includes(term) || category.includes(term)) {
-                card.style.display = "flex";
-            } else {
-                card.style.display = "none";
-            }
+            card.style.display = name.includes(term) ? "flex" : "none";
         });
     }
 
-    // পেজ লোড হওয়ার সময় রান করবে
     checkLogin();
     fetchItems();
 </script>
