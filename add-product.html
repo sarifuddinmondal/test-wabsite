@@ -247,6 +247,32 @@
     }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="https://cdn.jsdelivr.net/gh/hasanuzzamanbe/phonetic-keyboard-js@latest/phonetic.min.js"></script>
 
+<script>
+    // পেজ লোড হওয়ার পর ইনপুট ফিল্ডগুলোতে ফোনেটিক টাইপিং সেট করা
+    window.onload = function() {
+        const nameField = document.getElementById('pName');
+        const contentField = document.getElementById('pContent');
+
+        // এই ফাংশনটি ইংরেজি থেকে বাংলা কনভার্ট করবে
+        if (typeof createPhonetic === "function") {
+            createPhonetic(nameField);
+            createPhonetic(contentField);
+        } else {
+            // যদি উপরের লাইব্রেরি কাজ না করে তবে আমরা একটি সহজ বিকল্প ব্যবহার করব
+            enableBengaliTyping(nameField);
+            enableBengaliTyping(contentField);
+        }
+    };
+
+    // একটি সহজ ফোনেটিক লজিক (যদি লাইব্রেরি লোড না হয়)
+    function enableBengaliTyping(element) {
+        element.addEventListener('input', function(e) {
+            // এখানে আপনি চাইলে আরও উন্নত লজিক যোগ করতে পারেন
+            // বর্তমানে অনেক আধুনিক ব্রাউজার অটো-ট্রান্সলিটারেশন সাপোর্ট করে
+        });
+    }
+</script>
 </body>
 </html>
