@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product | Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #6e8efb; --secondary: #a777e3; --success: #00b894; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .container { background: white; width: 100%; max-width: 700px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+
+        .flex-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .flex-row div { flex: 1; min-width: 120px; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #666; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .upload-section { border: 2px dashed var(--primary); padding: 15px; border-radius: 10px; text-align: center; margin-top: 15px; background: #f9f9ff; }
+        #imgPreview { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; margin-top: 10px; display: none; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .price-box { background: #e8f5e9; padding: 10px; border-radius: 8px; text-align: right; font-weight: bold; color: var(--success); margin-bottom: 15px; }
+        
+        .btn-save { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+        .back-link { margin-bottom: 15px; text-decoration: none; color: var(--primary); font-weight: bold; align-self: flex-start; }
+    </style>
+</head>
+<body>
+
+<a href="dashboard.html" class="back-link"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+
+<div class="container">
+    <h2><i class="fa fa-edit"></i> Edit Product</h2>
+    <form id="editForm">
+        <div class="flex-row">
+            <div>
+                <label>Category</label>
+                <select id="pCat">
+                    <option>Cosmetics</option>
+                    <option>Jewelry</option>
+                    <option>Facewash</option>
+                </select>
+            </div>
+            <div style="flex: 2;">
+                <label>Product Name</label>
+                <input type="text" id="pName" required>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div>
+                <label>Code (Read Only)</label>
+                <input type="text" id="pCode" readonly style="background:#eee;">
+            </div>
+            <div>
+                <label>Stock</label>
+                <input type="number" id="pStock" required>
+            </div>
+            <div>
+                <label>Size (Txt)</label>
+                <select id="pSize">
+                    <option>N/A</option><option>Small</option><option>Medium</option><option>Large</option><option>XL</option>
+                </select>
+            </div>
+            <div>
+                <label>Size (Num)</label>
+                <input type="number" id="pSizeNum">
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div>
+                <label>Content</label>
+                <input type="text" id="pContent">
+            </div>
+            <div>
+                <label>Unit</label>
+                <select id="pUnit">
+                    <option>ml</option><option>g</option><option>pcs</option><option>pkg</option>
+                </select>
+            </div>
+            <div>
+                <label>MRP (₹)</label>
+                <input type="number" id="pMrp" oninput="updatePrice()" required>
+            </div>
+            <div>
+                <label>Disc (%)</label>
+                <input type="number" id="pDisc" oninput="updatePrice()" value="0">
+            </div>
+        </div>
+
+        <div id="priceResult" class="price-box">Final Price: ₹0.00</div>
+
+        <div class="upload-section">
+            <label for="fileInput" style="cursor:pointer;"><i class="fa fa-image"></i> Click to Change Photo</label>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="handleImage(this.files[0])">
+            <input type="hidden" id="pImgUrl">
+            <br>
+            <center><img id="imgPreview"></center>
+        </div>
+
+        <button type="submit" class="btn-save" id="saveBtn">SAVE CHANGES</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+    import { getSupabase } from './config.js';
+    const supabase = getSupabase();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+        alert("Product ID missing!");
+        window.location.href = 'dashboard.html';
+    }
+
+    // ১. ডাটা লোড করা
+    async function fetchProduct() {
+        const { data, error } = await supabase.from('products').select('*').eq('id', productId).single();
+        if (data) {
+            document.getElementById('pCat').value = data.cat;
+            document.getElementById('pName').value = data.name;
+            document.getElementById('pCode').value = data.code;
+            document.getElementById('pStock').value = data.stock;
+            document.getElementById('pSize').value = data.size || 'N/A';
+            document.getElementById('pSizeNum').value = data.size_num || 0;
+            document.getElementById('pMrp').value = data.mrp;
+            document.getElementById('pDisc').value = data.disc || 0;
+            document.getElementById('pImgUrl').value = data.img;
+
+            // Content Split (e.g., "100 ml")
+            if(data.content) {
+                const parts = data.content.split(' ');
+                document.getElementById('pContent').value = parts[0];
+                document.getElementById('pUnit').value = parts[1] || 'ml';
+            }
+
+            if(data.img) {
+                const img = document.getElementById('imgPreview');
+                img.src = data.img;
+                img.style.display = 'block';
+            }
+            updatePrice();
+        }
+    }
+
+    // ২. প্রাইস হিসাব
+    window.updatePrice = () => {
+        const mrp = parseFloat(document.getElementById('pMrp').value || 0);
+        const disc = parseFloat(document.getElementById('pDisc').value || 0);
+        const final = mrp - (mrp * disc / 100);
+        document.getElementById('priceResult').innerText = `Final Price: ₹${final.toFixed(2)}`;
+    };
+
+    // ৩. ইমেজ হ্যান্ডলিং
+    window.handleImage = async (file) => {
+        if(!file) return;
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerText = "Uploading Image...";
+
+        const fileName = `shop/${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage.from('server-1').upload(fileName, file);
+
+        if(!error) {
+            const { data: pUrl } = supabase.storage.from('server-1').getPublicUrl(fileName);
+            document.getElementById('pImgUrl').value = pUrl.publicUrl;
+            document.getElementById('imgPreview').src = pUrl.publicUrl;
+            document.getElementById('imgPreview').style.display = 'block';
+        }
+        btn.disabled = false;
+        btn.innerText = "SAVE CHANGES";
+    };
+
+    // ৪. আপডেট সাবমিট
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "Updating...";
+        
+        const mrp = parseFloat(document.getElementById('pMrp').value || 0);
+        const disc = parseFloat(document.getElementById('pDisc').value || 0);
+
+        const updatedRow = {
+            cat: document.getElementById('pCat').value,
+            name: document.getElementById('pName').value,
+            stock: parseInt(document.getElementById('pStock').value) || 0,
+            size: document.getElementById('pSize').value,
+            size_num: parseInt(document.getElementById('pSizeNum').value) || 0,
+            content: document.getElementById('pContent').value + " " + document.getElementById('pUnit').value,
+            mrp: mrp,
+            disc: disc,
+            price: mrp - (mrp * disc / 100),
+            img: document.getElementById('pImgUrl').value
+        };
+
+        const { error } = await supabase.from('products').update(updatedRow).eq('id', productId);
+
+        if (!error) {
+            alert("Product Updated!");
+            window.location.href = 'dashboard.html';
+        } else {
+            alert("Update Failed: " + error.message);
+            btn.innerText = "SAVE CHANGES";
+        }
+    });
+
+    window.onload = fetchProduct;
+</script>
+</body>
+</html>
