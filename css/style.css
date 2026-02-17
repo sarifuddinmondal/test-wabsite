@@ -1,6 +1,6 @@
 /* --- ১. গ্লোবাল সেটিংস --- */
 :root {
-    --primary-blue: #2874f0;
+    --primary-green: #2874f0;
     --accent-orange: #fb641b;
     --success-green: #388e3c;
     --text-dark: #212121;
@@ -51,7 +51,7 @@ body {
     padding: 2px 10px;
     align-items: center;
     margin: 0 15px;
-    max-width: 600px;
+    max-width: 300px;
 }
 
 .search-container input {
