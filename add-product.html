@@ -5,270 +5,233 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product | Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
     <style>
-        :root { --primary: #6e8efb; --secondary: #a777e3; --bg: #eef2f3; --success: #00b894; --dark: #2d3436; }
+        :root { --primary: #6e8efb; --secondary: #a777e3; --bg: #f4f7fe; --success: #00b894; --dark: #2d3436; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
 
-        .top-nav { width: 100%; max-width: 850px; display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .nav-btn { text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-dash { background: white; color: var(--primary); border: 1px solid var(--primary); }
-        .btn-home { background: var(--dark); color: white; }
+        /* Top Navigation Styling */
+        .top-nav { width: 100%; max-width: 650px; display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .nav-btn { text-decoration: none; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; color: white; flex: 1; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-dash { background: #6c5ce7; }
+        .btn-set { background: #fdb827; }
+        .btn-web { background: #00b894; }
+        .nav-btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        .main-wrapper { display: flex; gap: 20px; width: 100%; max-width: 900px; align-items: flex-start; }
-        
-        .form-container { background: white; flex: 2; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
-        .form-container h2 { text-align: center; margin-bottom: 20px; font-size: 22px; color: var(--primary); }
-
-        /* ডানদিকের বাংলা টুল বক্স */
-        .bengali-tool-box { flex: 1; background: #fff; padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--primary); position: sticky; top: 20px; }
-        .bengali-tool-box h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .bengali-tool-box p { font-size: 11px; color: #666; margin-bottom: 10px; }
-
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-weight: 600; color: #444; font-size: 13px; }
-        input, select { width: 100%; padding: 10px; border: 2px solid #f1f1f1; border-radius: 8px; font-size: 13px; outline: none; transition: 0.3s; background: #fafafa; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); background: white; }
+        .form-container { background: white; width: 100%; max-width: 650px; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border-top: 8px solid var(--primary); }
+        h2 { text-align: center; margin-bottom: 20px; color: var(--primary); font-size: 22px; }
 
         .flex-row { display: flex; gap: 10px; margin-bottom: 12px; }
         .flex-row div { flex: 1; }
 
-        .cat-input-group { display: flex; gap: 5px; }
-        .btn-add-cat { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; transition: 0.3s; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 12px; }
+        input, select { width: 100%; padding: 11px; border: 2px solid #f1f1f1; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
 
-        .upload-area { display: flex; align-items: center; justify-content: space-between; background: #f8f9ff; padding: 10px; border-radius: 10px; border: 2px dashed var(--primary); }
-        #imgPreview { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; display: none; cursor: zoom-in; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-        .price-info { font-size: 14px; font-weight: bold; color: var(--success); margin-top: 5px; text-align: right; }
-        .btn-submit { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.4s; }
-
-        #imgModal { display: none; position: fixed; z-index: 999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-        #imgModal img { max-width: 90%; max-height: 90%; border-radius: 10px; border: 5px solid white; }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .main-wrapper { flex-direction: column; }
-            .bengali-tool-box { width: 100%; position: static; order: -1; }
+        /* Photo Upload Area */
+        .upload-card { 
+            background: #f8f9ff; border: 2px dashed var(--primary); padding: 15px; 
+            border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s;
         }
+        .upload-card:hover { background: #f0f2ff; }
+        #imgPreview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; display: none; margin-top: 10px; border: 2px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+
+        .btn-submit { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(110,142,251,0.3); }
+        
+        /* Net Price Highlight */
+        .net-box { background: #e8f5e9; padding: 10px; border-radius: 10px; border: 1px solid #c8e6c9; }
+        .net-box input { background: transparent; border: none; font-weight: bold; color: var(--success); font-size: 15px; }
     </style>
 </head>
 <body>
 
 <div class="top-nav">
-    <a href="dashboard.html" class="nav-btn btn-dash"><i class="fa fa-arrow-left"></i> Dashboard</a>
-    <a href="index.html" class="nav-btn btn-home"><i class="fa fa-globe"></i> Visit Website</a>
+    <a href="dashboard.html" class="nav-btn btn-dash"><i class="fa fa-th-large"></i> Dashboard</a>
+    <a href="settings.html" class="nav-btn btn-set"><i class="fa fa-cog"></i> Settings</a>
+    <a href="index.html" class="nav-btn btn-web"><i class="fa fa-globe"></i> Website</a>
 </div>
 
-<div class="main-wrapper">
-    <div class="form-container">
-        <h2><i class="fa fa-cart-plus"></i> Add Product</h2>
-        
-        <form id="productForm">
-            <div class="flex-row">
-                <div style="flex: 1.2;">
-                    <label>Category</label>
-                    <div class="cat-input-group">
-                        <select id="pCat">
-                            <option>Cosmetics</option>
-                            <option>Jewelry</option>
-                            <option>Facewash</option>
-                        </select>
-                        <button type="button" class="btn-add-cat" onclick="addNewCategory()">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div style="flex: 2;">
-                    <label>Product Name (Type golar har for গলার হার)</label>
-                    <input type="text" id="pName" placeholder="Product Name" required>
-                </div>
+<div class="form-container">
+    <h2><i class="fa fa-plus-circle"></i> Add New Product</h2>
+    
+    <form id="productForm">
+        <div class="flex-row">
+            <div style="flex: 1.2;">
+                <label>Category</label>
+                <select id="pCat">
+                    <option value="">Loading...</option>
+                </select>
             </div>
-
-            <div class="flex-row">
-                <div>
-                    <label>Code</label>
-                    <input type="text" id="pCode" readonly style="background:#eee;">
-                </div>
-                <div>
-                    <label>Stock</label>
-                    <input type="number" id="pStock" value="0">
-                </div>
-                <div>
-                    <label>Size (Txt)</label>
-                    <select id="pSize">
-                        <option>N/A</option><option>Small</option><option>Medium</option><option>Large</option><option>XL</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Size (Num)</label>
-                    <input type="number" id="pSizeNum" placeholder="00">
-                </div>
+            <div style="flex: 2;">
+                <label>Product Name</label>
+                <input type="text" id="pName" placeholder="Enter name" required>
             </div>
-
-            <div class="flex-row">
-                <div>
-                    <label>Content (Type size/info)</label>
-                    <input type="text" id="pContent" placeholder="Value">
-                </div>
-                <div>
-                    <label>Unit</label>
-                    <select id="pUnit">
-                        <option>ml</option><option>g</option><option>pcs</option><option>pkg</option>
-                    </select>
-                </div>
-                <div>
-                    <label>MRP (₹)</label>
-                    <input type="number" id="pMrp" placeholder="0" oninput="calculatePrice()" required>
-                </div>
-                <div>
-                    <label>Disc (%)</label>
-                    <input type="number" id="pDisc" placeholder="0" oninput="calculatePrice()">
-                </div>
-            </div>
-
-            <div id="priceDisplay" class="price-info">Net Price: ₹0.00</div>
-
-            <div class="form-group">
-                <label>Product Photo</label>
-                <div class="upload-area">
-                    <label for="fileInput"><i class="fa fa-camera" style="font-size:24px; color:var(--primary); cursor:pointer;"></i> Click to Upload</label>
-                    <input type="file" id="fileInput" hidden accept="image/*" onchange="uploadAndRename(this.files[0])">
-                    <input type="hidden" id="pImgUrl">
-                    <img id="imgPreview" onclick="openZoom()">
-                </div>
-                <div id="uploadStatus" style="font-size:11px; color:var(--primary); text-align:center; display:none;">Processing Image...</div>
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn">SAVE PRODUCT</button>
-        </form>
-    </div>
-
-    <div class="bengali-tool-box">
-        <h4><i class="fa fa-language"></i> Bengali Typing Help</h4>
-        <p>ইংরেজিতে লিখুন (যেমন: <b>golar har</b>) তাহলে নিচে ৫টি অপশন পাবেন। কাঙ্ক্ষিত শব্দটি সিলেক্ট করুন।</p>
-        <div id="bengali_typing_status" style="font-size: 12px; color: var(--success);">
-            <i class="fa fa-check-circle"></i> Phonetic Active
         </div>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-        <p style="color: #999; font-size: 10px;">Shortcut: <b>Ctrl + G</b> to switch English/Bengali</p>
-    </div>
-</div>
 
-<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg"></div>
+        <div class="flex-row">
+            <div>
+                <label>Code (ID)</label>
+                <input type="text" id="pCode" readonly style="background:#f0f0f0; font-weight:bold;">
+            </div>
+            <div>
+                <label>Stock</label>
+                <input type="number" id="pStock" value="0">
+            </div>
+            <div>
+                <label>Size (Text)</label>
+                <select id="pSize">
+                    <option>N/A</option><option>Small</option><option>Medium</option><option>Large</option><option>XL</option>
+                </select>
+            </div>
+            <div>
+                <label>Size (Num)</label>
+                <input type="number" id="pSizeNum" placeholder="0">
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div style="flex: 1.5;">
+                <label>Content</label>
+                <input type="text" id="pContent" placeholder="Value (e.g. 500)">
+            </div>
+            <div>
+                <label>Unit</label>
+                <select id="pUnit">
+                    <option>ml</option><option>g</option><option>pcs</option><option>pkg</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div>
+                <label>MRP (₹)</label>
+                <input type="number" id="pMrp" placeholder="0" oninput="calcByNet()" required>
+            </div>
+            <div class="net-box">
+                <label style="color: #2e7d32;">Net Price (Sell Price)</label>
+                <input type="number" id="pNet" placeholder="0" oninput="calcByNet()">
+            </div>
+            <div>
+                <label>Discount (%)</label>
+                <input type="number" id="pDisc" placeholder="0" readonly style="background:#f9f9f9;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Upload Photo</label>
+            <div class="upload-card" onclick="document.getElementById('fileInput').click()">
+                <i class="fa fa-cloud-upload-alt" style="font-size:30px; color:var(--primary);"></i>
+                <p style="margin:5px 0; font-size:12px; color:#777;">Click to open local disk</p>
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="uploadImage(this.files[0])">
+                <input type="hidden" id="pImgUrl">
+                <center><img id="imgPreview"></center>
+            </div>
+            <div id="status" style="display:none; font-size:11px; color:var(--primary); text-align:center; margin-top:5px;">Uploading...</div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="saveBtn">SAVE PRODUCT</button>
+    </form>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script type="text/javascript">
-    // --- বাংলা ফোনেটিক টাইপিং লজিক ---
-    google.load("elements", "1", { packages: "transliteration" });
-
-    function onLoad() {
-        var options = {
-            sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
-            destinationLanguage: [google.elements.transliteration.LanguageCode.BENGALI],
-            shortcutKey: 'ctrl+g',
-            transliterationEnabled: true
-        };
-        var control = new google.elements.transliteration.TransliterationControl(options);
-        
-        // Product Name এবং Content বক্সে বাংলা ফোনেটিক কাজ করবে
-        control.makeTransliteratable(['pName', 'pContent']);
-    }
-    google.setOnLoadCallback(onLoad);
-</script>
-
 <script type="module">
     import { getSupabase } from './config.js';
     const supabase = getSupabase();
 
-    // 1. Generate Code
-    async function generateSmartCode() {
-        const { data } = await supabase.from('products').select('code');
-        let nextNum = (data ? data.length : 0) + 1;
-        document.getElementById('pCode').value = nextNum.toString().padStart(2, '0');
+    // ১. ক্যাটাগরি লিস্ট লোড করা
+    async function loadCats() {
+        const { data } = await supabase.from('categories').select('name');
+        const select = document.getElementById('pCat');
+        if(data && data.length > 0) {
+            select.innerHTML = data.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        } else {
+            select.innerHTML = `<option value="General">General</option>`;
+        }
     }
-    generateSmartCode();
 
-    // 2. New Category
-    window.addNewCategory = () => {
-        const newCat = prompt("Enter New Category Name:");
-        if (newCat) {
-            const select = document.getElementById('pCat');
-            const option = document.createElement('option');
-            option.text = newCat;
-            select.add(option);
-            select.value = newCat;
+    // ২. অটোমেটিক কোড জেনারেট করা
+    async function generateCode() {
+        const { data } = await supabase.from('products').select('id');
+        const count = data ? data.length : 0;
+        document.getElementById('pCode').value = (count + 1).toString().padStart(3, '0');
+    }
+
+    // ৩. নেট প্রাইস থেকে ডিসকাউন্ট বের করা (Reverse Calc)
+    window.calcByNet = () => {
+        const mrp = parseFloat(document.getElementById('pMrp').value || 0);
+        const net = parseFloat(document.getElementById('pNet').value || 0);
+        
+        if(mrp > 0 && net > 0) {
+            const discPercent = ((mrp - net) / mrp) * 100;
+            document.getElementById('pDisc').value = discPercent.toFixed(1);
+        } else {
+            document.getElementById('pDisc').value = 0;
         }
     };
 
-    // 3. Price Calc
-    window.calculatePrice = () => {
-        const mrp = parseFloat(document.getElementById('pMrp').value || 0);
-        const disc = parseFloat(document.getElementById('pDisc').value || 0);
-        const net = mrp - (mrp * disc / 100);
-        document.getElementById('priceDisplay').innerText = `Net Price: ₹${net.toFixed(2)}`;
-    };
-
-    // 4. Image Upload
-    window.uploadAndRename = async (file) => {
+    // ৪. ফটো আপলোড (Space/Click logic)
+    window.uploadImage = async (file) => {
         if(!file) return;
-        const status = document.getElementById('uploadStatus');
+        const status = document.getElementById('status');
+        const preview = document.getElementById('imgPreview');
         const code = document.getElementById('pCode').value;
-        status.style.display = 'block';
-        status.innerText = "Uploading...";
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `shop/${code}.${fileExt}`;
+        status.style.display = "block";
+        status.innerText = "Processing Image...";
 
-        const { data, error } = await supabase.storage.from('server-1').upload(fileName, file, { upsert: true });
+        const fileName = `products/${code}_${Date.now()}.png`;
+        const { data, error } = await supabase.storage.from('server-1').upload(fileName, file);
 
         if(!error) {
             const { data: pUrl } = supabase.storage.from('server-1').getPublicUrl(fileName);
             document.getElementById('pImgUrl').value = pUrl.publicUrl;
-            document.getElementById('imgPreview').src = pUrl.publicUrl;
-            document.getElementById('imgPreview').style.display = 'block';
-            status.innerText = "✅ Photo Ready!";
+            preview.src = pUrl.publicUrl;
+            preview.style.display = "block";
+            status.innerText = "✅ Photo Attached!";
         } else {
-            alert("Upload failed!");
+            alert("Upload Error: " + error.message);
+            status.style.display = "none";
         }
     };
 
-    // 5. Form Submit
+    // ৫. ফর্ম সাবমিট
     document.getElementById('productForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
+        const btn = document.getElementById('saveBtn');
         btn.disabled = true;
-        btn.innerText = "Saving...";
+        btn.innerText = "Saving Data...";
 
         const mrp = parseFloat(document.getElementById('pMrp').value);
-        const disc = parseFloat(document.getElementById('pDisc').value || 0);
+        const net = parseFloat(document.getElementById('pNet').value);
 
-        const productData = {
+        const payload = {
             cat: document.getElementById('pCat').value,
             name: document.getElementById('pName').value,
             code: document.getElementById('pCode').value,
-            stock: parseInt(document.getElementById('pStock').value),
+            stock: parseInt(document.getElementById('pStock').value) || 0,
+            size: document.getElementById('pSize').value,
+            size_num: parseInt(document.getElementById('pSizeNum').value) || 0, // ফাঁকা থাকলে ০ হবে
             content: document.getElementById('pContent').value + " " + document.getElementById('pUnit').value,
             mrp: mrp,
-            disc: disc,
-            price: mrp - (mrp * disc / 100),
-            img: document.getElementById('pImgUrl').value,
-            size: document.getElementById('pSize').value,
-            size_num: document.getElementById('pSizeNum').value 
+            disc: parseFloat(document.getElementById('pDisc').value) || 0,
+            price: net,
+            img: document.getElementById('pImgUrl').value
         };
 
-        const { error } = await supabase.from('products').insert([productData]);
+        const { error } = await supabase.from('products').insert([payload]);
+
         if(!error) {
-            alert("Product Saved Successfully!");
+            alert("Success! Product Added.");
             location.reload();
         } else {
-            alert("Error: " + error.message);
+            alert("Failed: " + error.message);
             btn.disabled = false;
+            btn.innerText = "SAVE PRODUCT";
         }
     });
-</script>
 
+    // ইনিশিয়ালাইজ
+    loadCats();
+    generateCode();
+</script>
 </body>
 </html>
