@@ -201,7 +201,7 @@
                         <td>₹${p.price}</td>
                         <td>${p.stock}</td>
                         <td>
-                            <button class="btn-action btn-edit" onclick="alert('Edit logic for ${p.id}')" title="Edit">
+                            <button class="btn-action btn-edit" onclick="window.location.href='edit.html?id=${p.id}'" title="Edit">
                                 <i class="fa fa-edit"></i>
                             </button>
                             <button class="btn-action btn-delete" onclick="window.deleteProduct(${p.id})" title="Delete">
