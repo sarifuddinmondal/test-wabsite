@@ -7,79 +7,97 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #6e8efb; --secondary: #a777e3; --danger: #ff7675; --success: #55efc4; --warning: #f1c40f; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; background: white; height: 100vh; padding: 25px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); position: fixed; }
-        .sidebar h2 { color: var(--primary); font-size: 22px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
-        .nav-link { 
-            display: flex; align-items: center; gap: 12px; padding: 12px 15px; 
-            text-decoration: none; color: #636e72; border-radius: 10px; transition: 0.3s; margin-bottom: 8px; font-weight: 500;
+        /* Top Navigation Bar */
+        .top-nav {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .nav-link:hover { background: #f0f2ff; color: var(--primary); }
-        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(110, 142, 251, 0.3); }
+        .nav-links { display: flex; gap: 15px; flex-wrap: wrap; }
+        .nav-item { 
+            text-decoration: none; 
+            color: #636e72; 
+            font-weight: 600; 
+            font-size: 13px; 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-item:hover { background: #f0f2ff; color: var(--primary); }
+        .nav-item.active { background: var(--primary); color: white; }
 
         /* Main Content */
-        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         
-        /* Search Bar Style */
-        .search-wrapper { position: relative; margin-bottom: 20px; width: 300px; }
-        .search-wrapper input { 
-            width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; 
-            border: 1px solid #ddd; outline: none; transition: 0.3s;
-        }
-        .search-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(110,142,251,0.2); }
-        .search-wrapper i { position: absolute; left: 15px; top: 12px; color: #aaa; }
-
         /* Stats Card */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); border-left: 5px solid var(--primary); }
-        .stat-card h3 { font-size: 13px; color: #b2bec3; margin: 0; text-transform: uppercase; }
-        .stat-card p { font-size: 24px; font-weight: bold; margin: 10px 0 0; color: #2d3436; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); border-left: 5px solid var(--primary); }
+        .stat-card h3 { font-size: 13px; color: #b2bec3; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card p { font-size: 28px; font-weight: bold; margin: 10px 0 0; color: #2d3436; }
 
-        /* Table Design */
-        .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        /* Table & Search */
+        .table-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .search-wrapper { position: relative; width: 350px; }
+        .search-wrapper input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 10px; border: 1px solid #eee; outline: none; background: #f9f9f9; transition: 0.3s; }
+        .search-wrapper input:focus { background: white; border-color: var(--primary); box-shadow: 0 0 10px rgba(110,142,251,0.1); }
+        .search-wrapper i { position: absolute; left: 15px; top: 15px; color: #aaa; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f1f1; color: #636e72; font-size: 14px; }
-        td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #2d3436; font-size: 14px; vertical-align: middle; }
-        .prod-img, .user-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: #eee; }
+        td { padding: 15px; border-bottom: 1px solid #f9f9f9; color: #2d3436; font-size: 14px; }
         
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .prod-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
         .badge-blue { background: #e0e7ff; color: #4338ca; }
 
-        /* Action Buttons */
-        .btn-action { border: none; padding: 8px; cursor: pointer; border-radius: 5px; transition: 0.3s; background: none; }
-        .btn-edit { color: var(--primary); font-size: 16px; margin-right: 10px; }
-        .btn-edit:hover { background: #f0f2ff; }
-        .btn-delete { color: var(--danger); font-size: 16px; }
-        .btn-delete:hover { background: #fff0f0; }
+        /* Buttons */
+        .action-btn { border: none; background: none; cursor: pointer; font-size: 16px; transition: 0.3s; padding: 5px; }
+        .btn-edit { color: var(--primary); }
+        .btn-delete { color: var(--danger); margin-left: 10px; }
+        
+        .logout-btn { color: var(--danger); background: #fff0f0; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-        .section { display: none; }
-        .section.active { display: block; }
-        .btn-logout { margin-top: 20px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        @media (max-width: 768px) {
+            .top-nav { flex-direction: column; gap: 15px; padding: 15px; }
+            .nav-links { overflow-x: auto; width: 100%; padding-bottom: 5px; }
+            .search-wrapper { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2><i class="fa fa-shield-alt"></i> Admin</h2>
-        <a href="#" class="nav-link active" onclick="showSection('productSection', this)"><i class="fa fa-box"></i> Products</a>
-        <a href="#" class="nav-link" onclick="showSection('consumerSection', this)"><i class="fa fa-users"></i> Consumer List</a>
-        <a href="add_product.html" class="nav-link"><i class="fa fa-plus-circle"></i> Add Product</a>
-        
-        <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;"><i class="fa fa-shopping-cart"></i> Sales Order</a>
-        <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;"><i class="fa fa-cog"></i> Settings</a>
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: bold; font-size: 20px;">
+            <i class="fa fa-shield-alt"></i> ADMIN
+        </div>
+        <div class="nav-links">
+            <a href="admin_dashboard.html" class="nav-item active"><i class="fa fa-th-large"></i> Dashboard</a>
+            <a href="#recent-products-section" class="nav-item"><i class="fa fa-list-ul"></i> Recent Products</a>
+            <a href="add_product.html" class="nav-item"><i class="fa-solid fa-square-plus"></i> Add Product</a>
+            <a href="consumer_list.html" class="nav-item"><i class="fa fa-users"></i> Consumers</a>
+            <a href="order_manager.html" class="nav-item"><i class="fa fa-shopping-cart"></i> Sales Order</a>
+            <a href="settings.html" class="nav-item"><i class="fa fa-cog"></i> Settings</a>
+            <a href="index.html" class="nav-item" target="_blank"><i class="fa fa-globe"></i> Website</a>
+        </div>
+        <button onclick="handleLogout()" class="logout-btn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </nav>
 
-        <a href="index.html" class="nav-link"><i class="fa fa-globe"></i> Visit Website</a>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        <button onclick="handleLogout()" class="nav-link btn-logout" style="color: var(--danger);"><i class="fa fa-sign-out-alt"></i> Logout</button>
-    </div>
-
-    <div class="main-content">
+    <div class="container">
         <div class="header-box">
-            <h1 id="pageTitle">Admin Dashboard</h1>
-            <span id="adminEmail" style="font-size: 12px; color: #888;"></span>
+            <h1>Overview Dashboard</h1>
+            <span id="adminEmail" style="color: #888; font-size: 14px;"></span>
         </div>
 
         <div class="stats-grid">
@@ -97,47 +115,27 @@
             </div>
         </div>
 
-        <div id="productSection" class="section active">
-            <div class="header-box" style="margin-bottom: 15px;">
-                <h3>Current Inventory</h3>
+        <div class="table-container" id="recent-products-section">
+            <div class="header-box">
+                <h3 style="margin:0;">Recent Products List</h3>
                 <div class="search-wrapper">
                     <i class="fa fa-search"></i>
                     <input type="text" id="productSearch" onkeyup="searchProduct()" placeholder="Search by name or code...">
                 </div>
             </div>
-            <div class="table-container">
-                <table id="product-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="product-list"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="consumerSection" class="section">
-            <div class="table-container">
-                <h3>Registered Consumers</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Photo</th>
-                            <th>Name</th>
-                            <th>Mobile</th>
-                            <th>State</th>
-                            <th>Join Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="consumer-list"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product Details</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="product-list"></tbody>
+            </table>
         </div>
     </div>
 
@@ -146,46 +144,27 @@
         import { getSupabase } from './config.js';
         const supabase = getSupabase();
 
-        let allProducts = []; // সার্চিং এর জন্য ডাটা সেভ রাখার জন্য
+        let allProducts = [];
 
-        // --- 1. Security Check ---
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 window.location.href = "admin_login.html";
             } else {
-                document.getElementById('adminEmail').innerText = "Logged in: " + session.user.email;
+                document.getElementById('adminEmail').innerText = "Logged in as: " + session.user.email;
                 loadDashboardData();
             }
         }
 
-        // --- 2. Load Data ---
         async function loadDashboardData() {
             const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-            const { data: users } = await supabase.from('consumer_data').select('*').order('created_at', { ascending: false });
+            const { data: users } = await supabase.from('consumer_data').select('*');
 
-            allProducts = prods; // Global variable এ সেভ করা হলো
-            renderProducts(prods);
-
-            // Display Consumer Data
-            const cList = document.getElementById('consumer-list');
-            cList.innerHTML = "";
-            users.forEach(u => {
-                cList.innerHTML += `
-                    <tr>
-                        <td><img src="${u.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="user-img"></td>
-                        <td>${u.first_name || 'N/A'} ${u.last_name || ''}</td>
-                        <td>${u.mobile_number || 'N/A'}</td>
-                        <td>${u.state || 'N/A'}</td>
-                        <td>${new Date(u.created_at).toLocaleDateString()}</td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('total-consumers').innerText = users.length;
+            allProducts = prods || [];
+            renderProducts(allProducts);
+            document.getElementById('total-consumers').innerText = (users || []).length;
         }
 
-        // --- 3. Render Product Table ---
         function renderProducts(prods) {
             let stockSum = 0;
             const pList = document.getElementById('product-list');
@@ -194,29 +173,27 @@
             prods.forEach(p => {
                 stockSum += parseInt(p.stock || 0);
                 pList.innerHTML += `
-                    <tr class="product-row">
+                    <tr>
                         <td><img src="${p.img}" class="prod-img"></td>
-                        <td class="p-info"><strong>${p.name}</strong><br><small>Code: ${p.code}</small></td>
+                        <td><strong>${p.name}</strong><br><small style="color:#999;">Code: ${p.code}</small></td>
                         <td><span class="badge badge-blue">${p.cat}</span></td>
-                        <td>₹${p.price}</td>
-                        <td>${p.stock}</td>
+                        <td style="font-weight:bold;">₹${p.price}</td>
+                        <td style="color:${p.stock < 5 ? 'red' : 'inherit'}">${p.stock}</td>
                         <td>
-                            <button class="btn-action btn-edit" onclick="window.location.href='edit.html?id=${p.id}'" title="Edit">
+                            <button class="action-btn btn-edit" onclick="window.location.href='edit.html?id=${p.id}'" title="Edit">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button class="btn-action btn-delete" onclick="window.deleteProduct(${p.id})" title="Delete">
+                            <button class="action-btn btn-delete" onclick="window.deleteProduct(${p.id})" title="Delete">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
 
             document.getElementById('total-count').innerText = prods.length;
             document.getElementById('total-stock').innerText = stockSum;
         }
 
-        // --- 4. Search Product ---
         window.searchProduct = () => {
             const term = document.getElementById('productSearch').value.toLowerCase();
             const filtered = allProducts.filter(p => 
@@ -226,29 +203,16 @@
             renderProducts(filtered);
         };
 
-        // --- 5. Delete Product ---
         window.deleteProduct = async (id) => {
-            if (confirm("Data will be permanently deleted. Continue?")) {
+            if (confirm("Are you sure? This action cannot be undone.")) {
                 const { error } = await supabase.from('products').delete().eq('id', id);
                 if (!error) {
                     alert("Product deleted!");
                     loadDashboardData();
-                } else {
-                    alert("Error: " + error.message);
                 }
             }
         };
 
-        // --- 6. Tab Switcher ---
-        window.showSection = (sectionId, element) => {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            element.classList.add('active');
-            document.getElementById('pageTitle').innerText = element.innerText;
-        };
-
-        // --- 7. Logout ---
         window.handleLogout = async () => {
             await supabase.auth.signOut();
             window.location.href = "admin_login.html";
