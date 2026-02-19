@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ডেলিভারি পার্টনার অ্যাপ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #1b8a43; --danger: #c0392b; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; }
+        
+        .container { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        h2 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 20px; }
+        .logo-icon { display: block; text-align: center; font-size: 50px; color: var(--primary); margin-bottom: 10px; }
+
+        input { width: 100%; padding: 14px; margin: 12px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        button { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .hidden { display: none; }
+
+        /* অর্ডার কার্ড ডিজাইন */
+        .order-card { background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #eee; border-left: 6px solid var(--primary); box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
+        .order-card p { margin: 5px 0; font-size: 14px; color: #444; }
+        .status-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; background: #e8f5e9; color: var(--primary); margin-top: 5px; }
+        
+        .btn-logout { background-color: var(--danger); margin-top: 25px; }
+        .refresh-btn { background: none; color: var(--primary); border: 1px solid var(--primary); margin-bottom: 15px; padding: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-page">
+        <i class="fa fa-truck-fast logo-icon"></i>
+        <h2>ডেলিভারি লগইন</h2>
+        <input type="text" id="user" placeholder="ইউজার আইডি">
+        <input type="password" id="pass" placeholder="পাসওয়ার্ড">
+        <button onclick="provesh()">লগইন করুন</button>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <h2><i class="fa fa-list-check"></i> নতুন অর্ডার তালিকা</h2>
+        <button class="refresh-btn" onclick="loadOrders()"><i class="fa fa-sync"></i> রিফ্রেশ করুন</button>
+        
+        <div id="list">
+            <div class="loading-text" style="text-align: center; color: #999;">অর্ডার লোড হচ্ছে...</div>
+        </div>
+
+        <button onclick="berHon()" class="btn-logout">লগ আউট</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+    // আপনার আগের config.js থেকে Supabase ইমপোর্ট করুন
+    import { getSupabase } from './config.js';
+    const supabase = getSupabase();
+
+    // ১. লগইন লজিক
+    window.provesh = () => {
+        const u = document.getElementById("user").value;
+        const p = document.getElementById("pass").value;
+
+        // এখানে আপনি আপনার ইচ্ছেমতো আইডি ও পাসওয়ার্ড দিন
+        if (u === "boy1" && p === "green123") {
+            document.getElementById("login-page").classList.add("hidden");
+            document.getElementById("dashboard").classList.remove("hidden");
+            loadOrders();
+        } else {
+            alert("ভুল আইডি বা পাসওয়ার্ড!");
+        }
+    };
+
+    // ২. অর্ডার লোড করার লজিক (সুপাবেস থেকে)
+    window.loadOrders = async () => {
+        const listDiv = document.getElementById("list");
+        listDiv.innerHTML = "অর্ডার খোঁজা হচ্ছে...";
+
+        // আপনার 'orders' টেবিল থেকে ডাটা আনা (যদি থাকে)
+        const { data, error } = await supabase
+            .from('orders') 
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            // যদি টেবিল না থাকে তবে ডেমো ডাটা দেখাবে
+            listDiv.innerHTML = `
+                <div class="order-card">
+                    <p><strong>অর্ডার নম্বর:</strong> #১০১</p>
+                    <p><strong>ঠিকানা:</strong> শান্তিপুর, নদীয়া</p>
+                    <p><strong>মোবাইল:</strong> 017xxxxxxxx</p>
+                    <span class="status-tag">অবস্থা: প্যাকিং হচ্ছে</span>
+                </div>
+                <div class="order-card">
+                    <p><strong>অর্ডার নম্বর:</strong> #১০২</p>
+                    <p><strong>ঠিকানা:</strong> কৃষ্ণনগর, নদীয়া</p>
+                    <p><strong>মোবাইল:</strong> 018xxxxxxxx</p>
+                    <span class="status-tag">অবস্থা: পথে আছে</span>
+                </div>`;
+            return;
+        }
+
+        // ডাটা থাকলে তা লুপ করে দেখানো
+        listDiv.innerHTML = "";
+        data.forEach(order => {
+            listDiv.innerHTML += `
+                <div class="order-card">
+                    <p><strong>অর্ডার নম্বর:</strong> #${order.id}</p>
+                    <p><strong>ঠিকানা:</strong> ${order.address}</p>
+                    <p><strong>টাকা:</strong> ₹${order.total_amount}</p>
+                    <span class="status-tag">অবস্থা: ${order.status}</span>
+                </div>
+            `;
+        });
+    };
+
+    window.berHon = () => {
+        location.reload();
+    };
+</script>
+
+</body>
+</html>
