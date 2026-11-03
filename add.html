@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add File</title>
+<title>Add File & Downloaded Apps</title>
 <style>
   :root {
     --bg: #f5f7fa; --surface: #ffffff; --text: #1c2430; --muted: #6b7686;
@@ -20,12 +20,12 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
-  main { max-width: 560px; margin: 0 auto; padding: 40px 16px 60px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 16px 60px; }
   .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   h1 { font-size: 1.6rem; margin: 0; }
   .top a { color: var(--accent); text-decoration: none; font-size: .95rem; }
 
-  form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; max-width: 560px; margin: 0 auto 40px; }
   label { display: block; font-weight: 600; margin: 0 0 6px; font-size: .95rem; }
   .field { margin-bottom: 18px; }
   input[type=text], select, textarea {
@@ -65,6 +65,70 @@
   button.add:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   #msg { margin-top: 14px; font-size: .92rem; min-height: 1.3em; }
   #msg.ok { color: var(--ok); } #msg.err { color: var(--err); }
+
+  /* App Cards Grid - 10 per line */
+  .apps-section { margin-top: 40px; }
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 12px;
+  }
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .app-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+  .app-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+  .app-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 1024px) {
+    .apps-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .apps-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .apps-grid { grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -77,20 +141,24 @@
   <form id="f">
     <div class="field">
       <label for="name">File name</label>
-      <input id="name" type="text" required placeholder="e.g. Project Report">
+      <input id="name" type="text" required placeholder="e.g. My Awesome Project">
+    </div>
+
+    <div class="field">
+      <label for="version">File version</label>
+      <input id="version" type="text" placeholder="e.g. v1.0.0">
     </div>
 
     <div class="field">
       <label for="type">File type</label>
       <select id="type" required>
         <option value="">Select type</option>
-        <option>PDF</option>
-        <option>ZIP</option>
-        <option>EXE</option>
-        <option>APK</option>
-        <option>Image</option>
-        <option>Document</option>
-        <option>Other</option>
+        <option value="Android APK">Android APK</option>
+        <option value="Windows EXE">Windows EXE</option>
+        <option value="Python">Python</option>
+        <option value="Google AI Studio Code">Google AI Studio Code</option>
+        <option value="HTML">HTML</option>
+        <option value="Other">Others</option>
       </select>
     </div>
 
@@ -116,11 +184,15 @@
     <button class="add" id="addBtn" type="submit">Add</button>
     <div id="msg" role="status"></div>
   </form>
+
+  <div class="apps-section">
+    <h2>Downloaded Apps / Files</h2>
+    <div class="apps-grid" id="appsGrid"></div>
+  </div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  // Google Apps Script web app URL
   const UPLOAD_URL = "https://script.google.com/macros/s/AKfycbzXveLmrx0ZfozK0d-qDNjTbl-WtlfP79oDrKD88Uj6sFTIQ3tdjt8QSAAQUQg72yiPpg/exec";
   const MAX_MB = 20;
   const SKIP = ["node_modules", ".git", ".DS_Store"];
@@ -128,7 +200,7 @@
   const $ = id => document.getElementById(id);
   const fileInput = $("file"), folderInput = $("folder"), chosen = $("chosen");
   const bar = $("bar"), barFill = bar.firstElementChild, msg = $("msg"), addBtn = $("addBtn");
-  let selected = null; // File jeta upload hobe
+  let selected = null;
 
   function say(text, kind) { msg.textContent = text; msg.className = kind || ""; }
   function size(n) {
@@ -142,8 +214,15 @@
   }
   function guessType(name) {
     const ext = name.split(".").pop().toLowerCase();
-    const map = { pdf: "PDF", zip: "ZIP", exe: "EXE", apk: "APK", png: "Image", jpg: "Image",
-      jpeg: "Image", gif: "Image", webp: "Image", doc: "Document", docx: "Document", txt: "Document" };
+    const map = { 
+      apk: "Android APK", 
+      exe: "Windows EXE", 
+      py: "Python", 
+      html: "HTML", 
+      htm: "HTML",
+      json: "Google AI Studio Code", 
+      js: "Google AI Studio Code"
+    };
     return map[ext] || "Other";
   }
   function autofill(file) {
@@ -151,14 +230,12 @@
     $("type").value = guessType(file.name);
   }
 
-  // Normal single file
   fileInput.addEventListener("change", () => {
     const f = fileInput.files[0];
     if (!f) return;
     selected = f; show(f); autofill(f); say("");
   });
 
-  // Folder -> ZIP
   $("folderBtn").addEventListener("click", () => folderInput.click());
   folderInput.addEventListener("change", async () => {
     const files = [...folderInput.files].filter(f => {
@@ -184,7 +261,7 @@
       fileInput.value = "";
       show(selected, files.length + " ti file zip hoyeche");
       if (!$("name").value) $("name").value = root;
-      $("type").value = "ZIP";
+      $("type").value = "Other";
       say("Zip ready. Ekhon Add e click korun.", "ok");
     } catch (e) {
       say("Zip korte problem hoyeche: " + e.message, "err");
@@ -194,7 +271,6 @@
     }
   });
 
-  // Submit / upload (Google Apps Script -> Drive + Sheet)
   function toBase64(file) {
     return new Promise((res, rej) => {
       const r = new FileReader();
@@ -213,6 +289,10 @@
     addBtn.disabled = true;
     bar.style.display = "block"; barFill.style.width = "35%";
     say("Upload hocche...");
+    
+    // Auto Today Date
+    const today = new Date().toISOString().split('T')[0];
+
     try {
       const data = await toBase64(selected);
       barFill.style.width = "65%";
@@ -221,10 +301,12 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
           name: $("name").value.trim(),
+          version: $("version").value.trim() || "v1.0",
           type: $("type").value,
           description: $("desc").value.trim(),
           fileName: selected.name,
           mime: selected.type || "application/octet-stream",
+          uploadDate: today,
           data: data
         })
       });
@@ -233,6 +315,7 @@
       barFill.style.width = "100%";
       say("Upload hoye geche. Drive ar Sheet e save hoyeche.", "ok");
       $("f").reset(); selected = null; chosen.style.display = "none";
+      loadAppCards();
     } catch (err) {
       say("Upload fail: " + err.message, "err");
     } finally {
@@ -240,6 +323,53 @@
       setTimeout(() => { bar.style.display = "none"; }, 600);
     }
   });
+
+  // Render App Cards
+  function renderAppCards(items) {
+    const grid = $("appsGrid");
+    grid.innerHTML = "";
+    const icons = {
+      "Android APK": "📱",
+      "Windows EXE": "⚙️",
+      "Python": "🐍",
+      "Google AI Studio Code": "🤖",
+      "HTML": "🌐",
+      "Other": "📁"
+    };
+
+    items.forEach(item => {
+      const card = document.createElement("a");
+      card.className = "app-card";
+      card.href = item.url || "#";
+      card.target = "_blank";
+      
+      const icon = icons[item.type] || "📁";
+      const verText = item.version ? item.version : "";
+      const dateText = item.uploadDate ? item.uploadDate : "";
+
+      card.innerHTML = `
+        <div class="app-icon">${icon}</div>
+        <div class="app-title" title="${item.name}">${item.name}</div>
+        <div class="app-sub">${verText} ${verText && dateText ? '•' : ''} ${dateText}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadAppCards() {
+    try {
+      const res = await fetch(UPLOAD_URL + "?action=list");
+      const data = await res.json();
+      const files = data.files || data;
+      if (Array.isArray(files)) {
+        renderAppCards(files);
+      }
+    } catch (e) {
+      console.error("Error loading apps:", e);
+    }
+  }
+
+  loadAppCards();
 </script>
 </body>
 </html>
