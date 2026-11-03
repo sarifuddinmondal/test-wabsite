@@ -3,87 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>File Downloads</title>
+<title>Admin Dashboard</title>
 <style>
   :root {
-    --bg: #f5f7fa;
-    --surface: #ffffff;
-    --text: #1c2430;
-    --muted: #6b7686;
-    --line: #dfe4ec;
-    --accent: #1f6feb;
-    --accent-ink: #ffffff;
+    --bg: #f5f7fa; --surface: #ffffff; --text: #1c2430; --muted: #6b7686;
+    --line: #dfe4ec; --accent: #1f6feb; --accent-ink: #ffffff;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #12161c;
-      --surface: #1a2029;
-      --text: #e8ecf2;
-      --muted: #8d98a8;
-      --line: #2a3340;
-      --accent: #4c8dff;
-      --accent-ink: #0b1220;
+      --bg: #12161c; --surface: #1a2029; --text: #e8ecf2; --muted: #8d98a8;
+      --line: #2a3340; --accent: #4c8dff; --accent-ink: #0b1220;
     }
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    margin: 0; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.5;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
   }
-  main { max-width: 1200px; margin: 0 auto; padding: 40px 16px 60px; }
-  h1 { font-size: 1.6rem; margin: 0 0 20px; }
-
-  .search {
-    position: relative;
-    margin-bottom: 30px;
-    max-width: 600px;
-  }
-  .search svg {
-    position: absolute; left: 14px; top: 50%;
-    transform: translateY(-50%);
-    width: 20px; height: 20px; color: var(--muted);
-  }
-  .search input {
-    width: 100%;
-    padding: 14px 16px 14px 44px;
-    font-size: 1rem;
-    color: var(--text);
+  .dashboard {
+    width: 100%; max-width: 480px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    outline: none;
+    border-radius: 20px;
+    padding: 30px 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    text-align: center;
   }
-  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
-
-  /* App Icon Grid: 1 line-e 10 ta card */
-  .apps-grid {
+  h1 { font-size: 1.5rem; margin-top: 0; margin-bottom: 25px; }
+  
+  .cards-grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
   .app-card {
-    background: var(--surface);
+    background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 16px;
-    padding: 14px 8px;
+    padding: 24px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
     text-decoration: none;
     color: var(--text);
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
   .app-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.1);
     border-color: var(--accent);
   }
-  .app-icon-wrap {
+  .app-icon {
     width: 56px;
     height: 56px;
     border-radius: 14px;
@@ -93,185 +65,46 @@
     align-items: center;
     justify-content: center;
     font-size: 1.6rem;
-    margin-bottom: 8px;
-    position: relative;
+    margin-bottom: 12px;
     box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 35%, transparent);
   }
-  .app-icon-wrap svg {
-    width: 26px;
-    height: 26px;
+  .app-icon svg {
+    width: 28px;
+    height: 28px;
   }
-  /* Download badge icon on top of app icon */
-  .dl-badge {
-    position: absolute;
-    bottom: -4px;
-    right: -4px;
-    background: var(--surface);
-    color: var(--accent);
-    border: 2px solid var(--line);
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .dl-badge svg {
-    width: 12px;
-    height: 12px;
-  }
-  .app-name {
-    font-size: 0.8rem;
+  .app-title {
+    font-size: 0.95rem;
     font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    width: 100%;
-    margin-bottom: 4px;
-  }
-  .app-meta {
-    font-size: 0.7rem;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100%;
-  }
-
-  .empty { display: none; padding: 38px 16px; text-align: center; color: var(--muted); grid-column: 1 / -1; font-size: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-
-  /* Responsive screen adjustments */
-  @media (max-width: 1200px) {
-    .apps-grid { grid-template-columns: repeat(6, 1fr); }
-  }
-  @media (max-width: 768px) {
-    .apps-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-  @media (max-width: 480px) {
-    .apps-grid { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
 <body>
-<main>
-  <h1>Files</h1>
 
-  <div class="search">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input id="q" type="search" placeholder="Search files..." autocomplete="off" aria-label="Search files">
-  </div>
-
-  <div class="apps-grid" id="list">
-    <div class="empty" id="empty" style="display: block;">Loading...</div>
-  </div>
-</main>
-
-<script>
-  const API = "https://script.google.com/macros/s/AKfycbzXveLmrx0ZfozK0d-qDNjTbl-WtlfP79oDrKD88Uj6sFTIQ3tdjt8QSAAQUQg72yiPpg/exec";
-  const q = document.getElementById('q');
-  const list = document.getElementById('list');
-  const empty = document.getElementById('empty');
+<div class="dashboard">
+  <h1>Admin Panel</h1>
   
-  const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>';
+  <div class="cards-grid">
+    <!-- Upload File Card -->
+    <a href="add.html" class="app-card">
+      <div class="app-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15V3m0 0l-4 4m4-4l4 4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+        </svg>
+      </div>
+      <div class="app-title">Upload File</div>
+    </a>
 
-  const TYPE_ICONS = {
-    PDF: '📄',
-    ZIP: '📦',
-    EXE: '⚙️',
-    APK: '📱',
-    Image: '🖼️',
-    Document: '📝',
-    Other: '📁'
-  };
+    <!-- Download File Card -->
+    <a href="index.html" class="app-card">
+      <div class="app-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+        </svg>
+      </div>
+      <div class="app-title">Download File</div>
+    </a>
+  </div>
+</div>
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  
-  function size(n) {
-    n = Number(n) || 0;
-    if (n < 1024) return n + ' B';
-    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
-    return (n / 1048576).toFixed(1) + ' MB';
-  }
-
-  let allFiles = [];
-
-  function render(files) {
-    if (!files.length) {
-      list.innerHTML = '';
-      list.appendChild(empty);
-      empty.textContent = 'Ekhono kono file nei.';
-      empty.style.display = 'block';
-      return;
-    }
-
-    empty.style.display = 'none';
-    list.innerHTML = files.map(f => {
-      const url = String(f.url || '').startsWith('https://') ? f.url : '#';
-      const fileType = f.type ? f.type.trim() : 'Other';
-      const iconEmoji = TYPE_ICONS[fileType] || '📁';
-      const metaText = size(f.size) + (f.description ? ' · ' + esc(f.description) : '');
-      const searchKey = esc((f.name + ' ' + f.fileName + ' ' + f.type).toLowerCase());
-
-      return `
-        <a class="app-card" href="${esc(url)}" download target="_blank" data-name="${searchKey}" aria-label="Download ${esc(f.name)}">
-          <div class="app-icon-wrap">
-            <span>${iconEmoji}</span>
-            <div class="dl-badge">${DL_ICON}</div>
-          </div>
-          <div class="app-name" title="${esc(f.name)}">${esc(f.name)}</div>
-          <div class="app-meta">${metaText}</div>
-        </a>
-      `;
-    }).join('');
-  }
-
-  function filter() {
-    const term = q.value.trim().toLowerCase();
-    const cards = list.querySelectorAll('.app-card');
-    let shown = 0;
-    
-    cards.forEach(card => {
-      const ok = card.dataset.name.includes(term);
-      card.style.display = ok ? 'flex' : 'none';
-      if (ok) shown++;
-    });
-
-    if (cards.length > 0 && shown === 0) {
-      if (!document.getElementById('empty-search')) {
-        const noRes = document.createElement('div');
-        noRes.id = 'empty-search';
-        noRes.className = 'empty';
-        noRes.textContent = 'Kono file pawa jayni.';
-        noRes.style.display = 'block';
-        list.appendChild(noRes);
-      } else {
-        document.getElementById('empty-search').style.display = 'block';
-      }
-    } else {
-      const noRes = document.getElementById('empty-search');
-      if (noRes) noRes.style.display = 'none';
-    }
-  }
-
-  q.addEventListener('input', filter);
-
-  fetch(API + '?action=list')
-    .then(r => r.json())
-    .then(d => { 
-      if (!d.ok) throw new Error(d.error); 
-      allFiles = d.files || [];
-      render(allFiles); 
-    })
-    .catch(() => { 
-      list.innerHTML = '';
-      list.appendChild(empty);
-      empty.textContent = 'List load hoyni. Internet ar script deploy check korun.'; 
-      empty.style.display = 'block'; 
-    });
-</script>
 </body>
 </html>
