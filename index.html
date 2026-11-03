@@ -33,12 +33,13 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
   }
-  main { max-width: 720px; margin: 0 auto; padding: 40px 16px 60px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 16px 60px; }
   h1 { font-size: 1.6rem; margin: 0 0 20px; }
 
   .search {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    max-width: 600px;
   }
   .search svg {
     position: absolute; left: 14px; top: 50%;
@@ -57,28 +58,100 @@
   }
   .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 
-  ul { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  li {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--line);
+  /* App Icon Grid: 1 line-e 10 ta card */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 16px;
   }
-  li:last-child { border-bottom: 0; }
-  .info { flex: 1; min-width: 0; }
-  .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .meta { font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dl {
-    flex: none;
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 40px; height: 40px;
-    border-radius: 8px;
-    background: var(--accent); color: var(--accent-ink);
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     text-decoration: none;
+    color: var(--text);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .dl:hover { opacity: .88; }
-  .dl:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-  .dl svg { width: 20px; height: 20px; }
-  .empty { display: none; padding: 28px 16px; text-align: center; color: var(--muted); }
+  .app-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    border-color: var(--accent);
+  }
+  .app-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    position: relative;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .app-icon-wrap svg {
+    width: 26px;
+    height: 26px;
+  }
+  /* Download badge icon on top of app icon */
+  .dl-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: var(--surface);
+    color: var(--accent);
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dl-badge svg {
+    width: 12px;
+    height: 12px;
+  }
+  .app-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  .app-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .empty { display: none; padding: 38px 16px; text-align: center; color: var(--muted); grid-column: 1 / -1; font-size: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+
+  /* Responsive screen adjustments */
+  @media (max-width: 1200px) {
+    .apps-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .apps-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .apps-grid { grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -90,8 +163,9 @@
     <input id="q" type="search" placeholder="Search files..." autocomplete="off" aria-label="Search files">
   </div>
 
-  <ul id="list"></ul>
-  <div class="empty" id="empty">Loading...</div>
+  <div class="apps-grid" id="list">
+    <div class="empty" id="empty" style="display: block;">Loading...</div>
+  </div>
 </main>
 
 <script>
@@ -99,45 +173,105 @@
   const q = document.getElementById('q');
   const list = document.getElementById('list');
   const empty = document.getElementById('empty');
-  const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>';
+  
+  const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>';
+
+  const TYPE_ICONS = {
+    PDF: '📄',
+    ZIP: '📦',
+    EXE: '⚙️',
+    APK: '📱',
+    Image: '🖼️',
+    Document: '📝',
+    Other: '📁'
+  };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  
   function size(n) {
     n = Number(n) || 0;
     if (n < 1024) return n + ' B';
     if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
     return (n / 1048576).toFixed(1) + ' MB';
   }
+
+  let allFiles = [];
+
   function render(files) {
+    if (!files.length) {
+      list.innerHTML = '';
+      list.appendChild(empty);
+      empty.textContent = 'Ekhono kono file nei.';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
     list.innerHTML = files.map(f => {
       const url = String(f.url || '').startsWith('https://') ? f.url : '#';
-      const meta = esc(f.type) + ' · ' + size(f.size) + (f.description ? ' · ' + esc(f.description) : '');
-      return '<li data-name="' + esc((f.name + ' ' + f.fileName + ' ' + f.type).toLowerCase()) + '">' +
-        '<div class="info"><div class="name">' + esc(f.name) + '</div><div class="meta">' + meta + '</div></div>' +
-        '<a class="dl" href="' + esc(url) + '" download aria-label="Download ' + esc(f.name) + '">' + ICON + '</a></li>';
+      const fileType = f.type ? f.type.trim() : 'Other';
+      const iconEmoji = TYPE_ICONS[fileType] || '📁';
+      const metaText = size(f.size) + (f.description ? ' · ' + esc(f.description) : '');
+      const searchKey = esc((f.name + ' ' + f.fileName + ' ' + f.type).toLowerCase());
+
+      return `
+        <a class="app-card" href="${esc(url)}" download target="_blank" data-name="${searchKey}" aria-label="Download ${esc(f.name)}">
+          <div class="app-icon-wrap">
+            <span>${iconEmoji}</span>
+            <div class="dl-badge">${DL_ICON}</div>
+          </div>
+          <div class="app-name" title="${esc(f.name)}">${esc(f.name)}</div>
+          <div class="app-meta">${metaText}</div>
+        </a>
+      `;
     }).join('');
-    filter();
   }
+
   function filter() {
     const term = q.value.trim().toLowerCase();
-    const items = list.querySelectorAll('li');
+    const cards = list.querySelectorAll('.app-card');
     let shown = 0;
-    items.forEach(li => {
-      const ok = li.dataset.name.includes(term);
-      li.style.display = ok ? '' : 'none';
+    
+    cards.forEach(card => {
+      const ok = card.dataset.name.includes(term);
+      card.style.display = ok ? 'flex' : 'none';
       if (ok) shown++;
     });
-    empty.textContent = items.length ? 'Kono file pawa jayni.' : 'Ekhono kono file nei.';
-    empty.style.display = shown ? 'none' : 'block';
+
+    if (cards.length > 0 && shown === 0) {
+      if (!document.getElementById('empty-search')) {
+        const noRes = document.createElement('div');
+        noRes.id = 'empty-search';
+        noRes.className = 'empty';
+        noRes.textContent = 'Kono file pawa jayni.';
+        noRes.style.display = 'block';
+        list.appendChild(noRes);
+      } else {
+        document.getElementById('empty-search').style.display = 'block';
+      }
+    } else {
+      const noRes = document.getElementById('empty-search');
+      if (noRes) noRes.style.display = 'none';
+    }
   }
+
   q.addEventListener('input', filter);
 
   fetch(API + '?action=list')
     .then(r => r.json())
-    .then(d => { if (!d.ok) throw new Error(d.error); render(d.files || []); })
-    .catch(() => { empty.textContent = 'List load hoyni. Internet ar script deploy check korun.'; empty.style.display = 'block'; });
+    .then(d => { 
+      if (!d.ok) throw new Error(d.error); 
+      allFiles = d.files || [];
+      render(allFiles); 
+    })
+    .catch(() => { 
+      list.innerHTML = '';
+      list.appendChild(empty);
+      empty.textContent = 'List load hoyni. Internet ar script deploy check korun.'; 
+      empty.style.display = 'block'; 
+    });
 </script>
 </body>
 </html>
