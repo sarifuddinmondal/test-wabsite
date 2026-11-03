@@ -1,274 +1,143 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CKART | Best Online Shopping</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File Downloads</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --text: #1c2430;
+    --muted: #6b7686;
+    --line: #dfe4ec;
+    --accent: #1f6feb;
+    --accent-ink: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c;
+      --surface: #1a2029;
+      --text: #e8ecf2;
+      --muted: #8d98a8;
+      --line: #2a3340;
+      --accent: #4c8dff;
+      --accent-ink: #0b1220;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 40px 16px 60px; }
+  h1 { font-size: 1.6rem; margin: 0 0 20px; }
 
-    <style>
-        /* লোগো স্টাইল */
-        .brand-logo img {
-            height: 40px;
-            width: auto;
-            border-radius: 4px;
-            vertical-align: middle;
-        }
+  .search {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .search svg {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 20px; height: 20px; color: var(--muted);
+  }
+  .search input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    outline: none;
+  }
+  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 
-        /* প্রোফাইল ফটো স্টাইল */
-        .user-profile-img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #fff;
-            cursor: pointer;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-left: 20px;
-            color: white;
-        }
-
-        .cart-box {
-            position: relative;
-            cursor: pointer;
-        }
-
-        #cartCount {
-            background: #ffda44;
-            color: #000;
-            font-size: 11px;
-            padding: 2px 5px;
-            border-radius: 50%;
-            font-weight: bold;
-            position: absolute;
-            top: -12px;
-            right: -10px;
-        }
-
-        /* স্টক স্ট্যাটাস কালার */
-        .stock-info {
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        .in-stock { color: var(--success-green); }
-        .out-stock { color: #d32f2f; }
-
-        #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-        }
-
-        /* গুগল ট্রান্সলেটর পজিশন */
-        #google_translate_element {
-            margin-left: 10px;
-            display: inline-block;
-        }
-        .goog-te-gadget-simple {
-            border-radius: 4px;
-            padding: 2px 5px;
-        }
-    </style>
+  ul { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  li {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  li:last-child { border-bottom: 0; }
+  .info { flex: 1; min-width: 0; }
+  .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .meta { font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dl {
+    flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    background: var(--accent); color: var(--accent-ink);
+    text-decoration: none;
+  }
+  .dl:hover { opacity: .88; }
+  .dl:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .dl svg { width: 20px; height: 20px; }
+  .empty { display: none; padding: 28px 16px; text-align: center; color: var(--muted); }
+</style>
 </head>
 <body>
+<main>
+  <h1>Files</h1>
 
-<header class="header">
-    <a href="index.html" class="brand-logo">
-        <img src="https://i.ibb.co/yc5dypjr/1000088857.jpg" alt="CKART">
-    </a>
-    
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for products, brands and more...">
-        <button onclick="search()"><i class="fa fa-search"></i></button>
-    </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Search files..." autocomplete="off" aria-label="Search files">
+  </div>
 
-    <div id="google_translate_element"></div>
+  <ul id="list"></ul>
+  <div class="empty" id="empty">Loading...</div>
+</main>
 
-    <div class="header-actions">
-        <div onclick="location.reload()" title="Home"><i class="fa fa-home"></i></div>
-        
-        <div id="authBox">
-            <a href="login.html" style="color: green; text-decoration: none;">
-                <i class="fa fa-user fa-2x"></i> </a>
-            </a>
-        </div>
+<script>
+  const API = "https://script.google.com/macros/s/AKfycbzXveLmrx0ZfozK0d-qDNjTbl-WtlfP79oDrKD88Uj6sFTIQ3tdjt8QSAAQUQg72yiPpg/exec";
+  const q = document.getElementById('q');
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>';
 
-        <div class="cart-box">
-            <i class="fa fa-shopping-cart"></i>
-            <span id="cartCount">0</span>
-        </div>
-    </div>
-</header>
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function size(n) {
+    n = Number(n) || 0;
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+  function render(files) {
+    list.innerHTML = files.map(f => {
+      const url = String(f.url || '').startsWith('https://') ? f.url : '#';
+      const meta = esc(f.type) + ' · ' + size(f.size) + (f.description ? ' · ' + esc(f.description) : '');
+      return '<li data-name="' + esc((f.name + ' ' + f.fileName + ' ' + f.type).toLowerCase()) + '">' +
+        '<div class="info"><div class="name">' + esc(f.name) + '</div><div class="meta">' + meta + '</div></div>' +
+        '<a class="dl" href="' + esc(url) + '" download aria-label="Download ' + esc(f.name) + '">' + ICON + '</a></li>';
+    }).join('');
+    filter();
+  }
+  function filter() {
+    const term = q.value.trim().toLowerCase();
+    const items = list.querySelectorAll('li');
+    let shown = 0;
+    items.forEach(li => {
+      const ok = li.dataset.name.includes(term);
+      li.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+    empty.textContent = items.length ? 'Kono file pawa jayni.' : 'Ekhono kono file nei.';
+    empty.style.display = shown ? 'none' : 'block';
+  }
+  q.addEventListener('input', filter);
 
-<div class="main-container" id="productGrid">
-    <p style="text-align: center; grid-column: 1/-1;">Loading products...</p>
-</div>
-
-<div id="modal">
-    <span class="close-btn" onclick="closeModal()">&times;</span>
-    <img id="modalImg" src="" style="max-width: 90%; max-height: 80%; object-fit: contain;">
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script type="module">
-    import { getSupabase } from './config.js';
-    const supabase = getSupabase();
-
-    // --- ১. লগইন এবং প্রোফাইল ফটো লজিক ---
-    async function checkLogin() {
-        const authBox = document.getElementById('authBox');
-        const userMobile = localStorage.getItem('customerMobile');
-
-        if (userMobile) {
-            // সুপাবেস থেকে ইউজারের প্রোফাইল ফটো নিয়ে আসা
-            const { data: user, error } = await supabase
-                .from('customers') 
-                .select('profile_img')
-                .eq('mobile', userMobile)
-                .single();
-
-            let profilePic = '<i class="fa fa-user-circle"></i>';
-            if (user && user.profile_img) {
-                profilePic = `<img src="${user.profile_img}" class="user-profile-img" alt="Profile">`;
-            }
-
-            authBox.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px">
-                    <a href="myprofile.html" title="My Profile">${profilePic}</a>
-                    <i class="fa fa-sign-out-alt" onclick="logoutUser()" style="color:#ffda44; cursor:pointer" title="Logout"></i>
-                </div>
-            `;
-        }
-    }
-
-    window.logoutUser = () => {
-        if(confirm("Do you want to logout?")) {
-            localStorage.removeItem('customerMobile');
-            location.reload();
-        }
-    }
-
-    // --- ২. ডেটাবেস থেকে সব ডিটেইলসসহ প্রোডাক্ট লোড করা ---
-    async function fetchItems() {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('id', { ascending: false });
-
-        if(error) {
-            console.error("Error:", error);
-            document.getElementById('productGrid').innerHTML = "Error loading products.";
-            return;
-        }
-
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = "";
-
-        data.forEach(p => {
-            const isOutOfStock = p.stock <= 0;
-            
-            grid.innerHTML += `
-                <div class="product-card">
-                    <div class="discount-badge">${p.disc}% OFF</div>
-                    <div class="image-box" onclick="openZoom('${p.img}')">
-                        <img src="${p.img}" alt="${p.name}">
-                    </div>
-                    <div class="info-box">
-                        <div>
-                            <div class="p-category">${p.cat}</div>
-                            <div class="p-name">${p.name}</div>
-                            
-                            <div style="font-size: 12px; color: #666;">
-                                ${p.content || ''} | Size: ${p.size_text || p.size_num || 'N/A'}
-                            </div>
-
-                            <div class="price-box">
-                                <span class="final-price">₹${p.price}</span>
-                                <span class="mrp">₹${p.mrp}</span>
-                                <span class="discount">${p.disc}% off</span>
-                            </div>
-
-                            <div class="stock-info ${isOutOfStock ? 'out-stock' : 'in-stock'}">
-                                ${isOutOfStock ? 'Out of Stock' : 'In Stock: ' + p.stock}
-                            </div>
-                        </div>
-                        
-                        <button class="add-btn" 
-                            onclick="addToCart(this)" 
-                            ${isOutOfStock ? 'disabled style="background:#ccc"' : ''}>
-                            ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // --- ৩. কার্ট কাউন্ট ---
-    let cartNum = 0;
-    window.addToCart = (btn) => {
-        cartNum++;
-        document.getElementById('cartCount').innerText = cartNum;
-        btn.innerText = "Added ✓";
-        btn.style.background = "#388e3c";
-    }
-
-    // --- ৪. ইমেজ জুম ---
-    window.openZoom = (src) => {
-        document.getElementById('modalImg').src = src;
-        document.getElementById('modal').style.display = 'flex';
-    }
-
-    window.closeModal = () => {
-        document.getElementById('modal').style.display = 'none';
-    }
-
-    // --- ৫. সার্চ ---
-    window.search = () => {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.product-card');
-        cards.forEach(card => {
-            const name = card.querySelector('.p-name').innerText.toLowerCase();
-            card.style.display = name.includes(term) ? "flex" : "none";
-        });
-    }
-
-    checkLogin();
-    fetchItems();
+  fetch(API + '?action=list')
+    .then(r => r.json())
+    .then(d => { if (!d.ok) throw new Error(d.error); render(d.files || []); })
+    .catch(() => { empty.textContent = 'List load hoyni. Internet ar script deploy check korun.'; empty.style.display = 'block'; });
 </script>
-
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'bn,en',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-        }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
 </body>
 </html>
