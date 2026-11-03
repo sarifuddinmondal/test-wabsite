@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add File</title>
+<style>
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --text: #1c2430; --muted: #6b7686;
+    --line: #dfe4ec; --accent: #1f6feb; --accent-ink: #ffffff;
+    --ok: #1a7f37; --err: #cf222e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c; --surface: #1a2029; --text: #e8ecf2; --muted: #8d98a8;
+      --line: #2a3340; --accent: #4c8dff; --accent-ink: #0b1220;
+      --ok: #3fb950; --err: #ff7b72;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
+  main { max-width: 560px; margin: 0 auto; padding: 40px 16px 60px; }
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  h1 { font-size: 1.6rem; margin: 0; }
+  .top a { color: var(--accent); text-decoration: none; font-size: .95rem; }
+
+  form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  label { display: block; font-weight: 600; margin: 0 0 6px; font-size: .95rem; }
+  .field { margin-bottom: 18px; }
+  input[type=text], select, textarea {
+    width: 100%; padding: 12px 14px; font: inherit; color: var(--text);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; outline: none;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+
+  .upload-row { display: flex; gap: 10px; align-items: stretch; }
+  .upload-row .file-input { flex: 1; min-width: 0; }
+  input[type=file] { width: 100%; padding: 9px 10px; font: inherit; color: var(--text);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  .folder-btn {
+    flex: none; width: 48px; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--accent);
+    cursor: pointer;
+  }
+  .folder-btn:hover { border-color: var(--accent); }
+  .folder-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .folder-btn svg { width: 24px; height: 24px; }
+  .hint { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+
+  .chosen { display: none; margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--line);
+    border-radius: 8px; font-size: .9rem; word-break: break-all; }
+  .bar { display: none; height: 6px; background: var(--line); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s; }
+
+  button.add {
+    width: 100%; padding: 13px; font: inherit; font-weight: 600; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px;
+  }
+  button.add:disabled { opacity: .55; cursor: not-allowed; }
+  button.add:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #msg { margin-top: 14px; font-size: .92rem; min-height: 1.3em; }
+  #msg.ok { color: var(--ok); } #msg.err { color: var(--err); }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Add file</h1>
+    <a href="index.html">Back to files</a>
+  </div>
+
+  <form id="f">
+    <div class="field">
+      <label for="name">File name</label>
+      <input id="name" type="text" required placeholder="e.g. Project Report">
+    </div>
+
+    <div class="field">
+      <label for="type">File type</label>
+      <select id="type" required>
+        <option value="">Select type</option>
+        <option>PDF</option>
+        <option>ZIP</option>
+        <option>EXE</option>
+        <option>APK</option>
+        <option>Image</option>
+        <option>Document</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="desc">File description</label>
+      <textarea id="desc" placeholder="File ta ki, ki kaje lagbe..."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="file">Upload file</label>
+      <div class="upload-row">
+        <div class="file-input"><input id="file" type="file"></div>
+        <button type="button" class="folder-btn" id="folderBtn" title="Upload project (folder ke zip kore)" aria-label="Upload project folder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 16v-5m0 0l-2 2m2-2l2 2"/></svg>
+        </button>
+        <input id="folder" type="file" webkitdirectory directory multiple hidden>
+      </div>
+      <div class="hint">Folder icon e click kore project folder select korun, ota auto zip hobe. node_modules ar .git bad jabe. Maximum 20 MB.</div>
+      <div class="chosen" id="chosen"></div>
+      <div class="bar" id="bar"><span></span></div>
+    </div>
+
+    <button class="add" id="addBtn" type="submit">Add</button>
+    <div id="msg" role="status"></div>
+  </form>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  // Google Apps Script web app URL
+  const UPLOAD_URL = "https://script.google.com/macros/s/AKfycbzXveLmrx0ZfozK0d-qDNjTbl-WtlfP79oDrKD88Uj6sFTIQ3tdjt8QSAAQUQg72yiPpg/exec";
+  const MAX_MB = 20;
+  const SKIP = ["node_modules", ".git", ".DS_Store"];
+
+  const $ = id => document.getElementById(id);
+  const fileInput = $("file"), folderInput = $("folder"), chosen = $("chosen");
+  const bar = $("bar"), barFill = bar.firstElementChild, msg = $("msg"), addBtn = $("addBtn");
+  let selected = null; // File jeta upload hobe
+
+  function say(text, kind) { msg.textContent = text; msg.className = kind || ""; }
+  function size(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+    return (n / 1048576).toFixed(1) + " MB";
+  }
+  function show(file, note) {
+    chosen.style.display = "block";
+    chosen.textContent = file.name + " (" + size(file.size) + ")" + (note ? " - " + note : "");
+  }
+  function guessType(name) {
+    const ext = name.split(".").pop().toLowerCase();
+    const map = { pdf: "PDF", zip: "ZIP", exe: "EXE", apk: "APK", png: "Image", jpg: "Image",
+      jpeg: "Image", gif: "Image", webp: "Image", doc: "Document", docx: "Document", txt: "Document" };
+    return map[ext] || "Other";
+  }
+  function autofill(file) {
+    if (!$("name").value) $("name").value = file.name.replace(/\.[^.]+$/, "");
+    $("type").value = guessType(file.name);
+  }
+
+  // Normal single file
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files[0];
+    if (!f) return;
+    selected = f; show(f); autofill(f); say("");
+  });
+
+  // Folder -> ZIP
+  $("folderBtn").addEventListener("click", () => folderInput.click());
+  folderInput.addEventListener("change", async () => {
+    const files = [...folderInput.files].filter(f => {
+      const parts = f.webkitRelativePath.split("/");
+      return !parts.some(p => SKIP.includes(p));
+    });
+    if (!files.length) return;
+    const root = files[0].webkitRelativePath.split("/")[0];
+
+    if (typeof JSZip === "undefined") { say("JSZip load hoyni. Internet connection check korun.", "err"); return; }
+
+    addBtn.disabled = true;
+    say("Zip toiri hocche (" + files.length + " ti file)...");
+    bar.style.display = "block"; barFill.style.width = "0";
+    try {
+      const zip = new JSZip();
+      files.forEach(f => zip.file(f.webkitRelativePath, f));
+      const blob = await zip.generateAsync(
+        { type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } },
+        m => { barFill.style.width = m.percent.toFixed(0) + "%"; }
+      );
+      selected = new File([blob], root + ".zip", { type: "application/zip" });
+      fileInput.value = "";
+      show(selected, files.length + " ti file zip hoyeche");
+      if (!$("name").value) $("name").value = root;
+      $("type").value = "ZIP";
+      say("Zip ready. Ekhon Add e click korun.", "ok");
+    } catch (e) {
+      say("Zip korte problem hoyeche: " + e.message, "err");
+    } finally {
+      addBtn.disabled = false;
+      setTimeout(() => { bar.style.display = "none"; }, 600);
+    }
+  });
+
+  // Submit / upload (Google Apps Script -> Drive + Sheet)
+  function toBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(",")[1]);
+      r.onerror = () => rej(new Error("File porte parlam na"));
+      r.readAsDataURL(file);
+    });
+  }
+
+  $("f").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!selected) { say("Age ekta file ba project folder select korun.", "err"); return; }
+    if (selected.size > MAX_MB * 1048576) {
+      say("File boro (" + size(selected.size) + "). Maximum " + MAX_MB + " MB.", "err"); return;
+    }
+    addBtn.disabled = true;
+    bar.style.display = "block"; barFill.style.width = "35%";
+    say("Upload hocche...");
+    try {
+      const data = await toBase64(selected);
+      barFill.style.width = "65%";
+      const res = await fetch(UPLOAD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          name: $("name").value.trim(),
+          type: $("type").value,
+          description: $("desc").value.trim(),
+          fileName: selected.name,
+          mime: selected.type || "application/octet-stream",
+          data: data
+        })
+      });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || "Unknown error");
+      barFill.style.width = "100%";
+      say("Upload hoye geche. Drive ar Sheet e save hoyeche.", "ok");
+      $("f").reset(); selected = null; chosen.style.display = "none";
+    } catch (err) {
+      say("Upload fail: " + err.message, "err");
+    } finally {
+      addBtn.disabled = false;
+      setTimeout(() => { bar.style.display = "none"; }, 600);
+    }
+  });
+</script>
+</body>
+</html>
